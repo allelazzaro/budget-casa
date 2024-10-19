@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head><link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Budget Familiare</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f5f5f5; /* Sfondo neutro */
+            color: black; /* Colore del testo */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Sfondo semi-trasparente per la tabella */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #e0e0e0;
+        }
+        button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
+<body>
+
+    <h1>Gestione Budget Familiare</h1>
+
+    <h2>Aggiungi Entrata</h2>
+    <select id="income-user" required>
+        <option value="" disabled selected>Seleziona Nome</option>
+        <option value="Alessio">Alessio</option>
+        <option value="Giulia">Giulia</option>
+    </select>
+    <select id="income-category" required>
+        <option value="" disabled selected>Seleziona Categoria</option>
+        <option value="Stipendio">Stipendio</option>
+        <option value="Extra">Extra</option>
+    </select>
+    <input type="text" id="income-source" placeholder="Fonte" required />
+    <input type="number" id="income-amount" placeholder="Importo" required />
+    <input type="date" id="income-date" required />
+    <button onclick="addIncome()">Aggiungi Entrata</button>
+
+    <h2>Aggiungi Uscita</h2>
+    <select id="expense-user" required>
+        <option value="" disabled selected>Seleziona Nome</option>
+        <option value="Alessio">Alessio</option>
+        <option value="Giulia">Giulia</option>
+    </select>
+    <select id="expense-category" required>
+        <option value="" disabled selected>Seleziona Categoria</option>
+        <option value="CONDOMINIO">CONDOMINIO</option>
+        <option value="ALIMENTARI">ALIMENTARI</option>
+        <option value="COSE DI CASA">COSE DI CASA</option>
+        <option value="ANIMALI">ANIMALI</option>
+        <option value="LUCE">LUCE</option>
+        <option value="INTERNET E CELLULARI">INTERNET E CELLULARI</option>
+        <option value="VARIE">VARIE</option>
+        <option value="SPORT">SPORT</option>
+        <option value="CULTURA">CULTURA</option>
+        <option value="SALUTE">SALUTE</option>
+        <option value="BELLEZZA">BELLEZZA</option>
+        <option value="ABBIGLIAMENTO">ABBIGLIAMENTO</option>
+        <option value="CONSUMI AUTO">CONSUMI AUTO</option>
+        <option value="MANUTENZIONE AUTO">MANUTENZIONE AUTO</option>
+        <option value="VARIE AUTO">VARIE AUTO</option>
+        <option value="ASSICURAZIONE E BOLLI">ASSICURAZIONE E BOLLI</option>
+        <option value="COLAZIONI">COLAZIONI</option>
+        <option value="PRANZI">PRANZI</option>
+        <option value="MERENDE E APERITIVI">MERENDE E APERITIVI</option>
+        <option value="CENE INSIEME">CENE INSIEME</option>
+        <option value="CENE CON AMICI">CENE CON AMICI</option>
+        <option value="VACANZE">VACANZE</option>
+        <option value="REGALI">REGALI</option>
+    </select>
+    <input type="text" id="expense-description" placeholder="Descrizione" required />
+    <input type="number" id="expense-amount" placeholder="Importo" required />
+    <input type="date" id="expense-date" required />
+    <button onclick="addExpense()">Aggiungi Uscita</button>
+
+    <h2>Seleziona Mese</h2>
+    <input type="month" id="month-selector" onchange="renderBudget()" />
+
+    <h2>Riepilogo Budget Mensile - <span id="current-month-year"></span></h2>
+    <table id="budget-summary">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Descrizione</th>
+                <th>Categoria</th>
+                <th>Importo</th>
+                <th>Data</th>
+                <th>Nome</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Le righe verranno aggiunte qui da JavaScript -->
+        </tbody>
+    </table>
+
+    <h2>Riepilogo Budget Totale - Anno <span id="current-year"></span></h2>
+    <table id="total-budget-summary">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Descrizione</th>
+                <th>Categoria</th>
+                <th>Importo</th>
+                <th>Data</th>
+                <th>Nome</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Le righe verranno aggiunte qui da JavaScript -->
+        </tbody>
+    </table>
+
+    <h2>Totale per Categoria</h2>
+    <table id="category-summary">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th>Totale</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Le righe delle categorie verranno aggiunte qui da JavaScript -->
+        </tbody>
+    </table>
+
+    <h2>Totali per Utente</h2>
+    <table id="user-summary">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Entrate Totali</th>
+                <th>Uscite Totali</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Alessio</td>
+                <td id="total-income-alessio">0</td>
+                <td id="total-expense-alessio">0</td>
+            </tr>
+            <tr>
+                <td>Giulia</td>
+                <td id="total-income-giulia">0</td>
+                <td id="total-expense-giulia">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="app.js"></script>
+    <script>
+        // Imposta la data corrente come valore predefinito per i campi di data
+        const today = new Date().toISOString().split('T')[0]; // Ottiene la data corrente in formato YYYY-MM-DD
+        document.getElementById('income-date').value = today; // Imposta la data nel campo delle entrate
+        document.getElementById('expense-date').value = today; // Imposta la data nel campo delle uscite
+
+        // Imposta il mese corrente come valore predefinito per il selettore del mese
+        const currentMonth = today.split('-').slice(0, 2).join('-'); // Ottiene il mese corrente in formato YYYY-MM
+        document.getElementById('month-selector').value = currentMonth; // Imposta il mese nel selettore
+        document.getElementById('current-year').innerText = new Date().getFullYear(); // Mostra l'anno corrente
+        renderBudget(); // Mostra il budget per il mese corrente
+    </script>
+</body>
+</html>
